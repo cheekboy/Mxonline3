@@ -5,6 +5,264 @@ from django.contrib.auth.models import AbstractUser
 
 
 # Create your models here.
+class Question(models.Model):
+    question_text = models.CharField(max_length=200)
+    pub_date = models.DateTimeField('date published')
+
+
+class AssetProject(models.Model):
+    projects = models.CharField(max_length=128, verbose_name='资产项目')
+    ps = models.CharField(max_length=1024, verbose_name="备注", null=True, blank=True)
+
+    class Meta:
+        db_table = "AssetProject"
+        verbose_name = "资产项目"
+        verbose_name_plural = '资产项目'
+        permissions = {
+            ('read_assetproject', u"只读资产项目"),
+            ('cmd_assetproject', u"执行资产项目"),
+        }
+
+    def __str__(self):
+        return self.projects
+
+
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0)
+
+
+class GongShangXinXi(models.Model):
+    gong_shang_ming_chen = models.CharField(verbose_name=u"供商名称",max_length=200)
+    lian_xi_ren =  models.CharField(verbose_name=u"联系人",max_length=200)
+    lian_xi_dian_hua =  models.CharField(verbose_name=u"联系电话",max_length=200)
+    lian_xi_di_zhi =  models.CharField(verbose_name=u"联系地址",max_length=200)
+    bei_zhu =  models.CharField(verbose_name=u"备注",max_length=200)
+
+    class Meta:
+        verbose_name = u"供应商信息"
+        verbose_name_plural = verbose_name
+
+
+class ShuiNiXinXi(models.Model):
+    shui_ni_bian_hao = models.CharField(verbose_name=u"水泥编号", max_length=200)
+    chang_jia = models.CharField(verbose_name=u"厂家", max_length=200)
+    pin_pai = models.CharField(verbose_name=u"品牌", max_length=200)
+    xing_hao = models.CharField(verbose_name=u"型号", max_length=200)
+    gui_ge = models.CharField(verbose_name=u"规格", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+    class Meta:
+        verbose_name = u"水泥信息"
+        verbose_name_plural = verbose_name
+
+
+class KeHuXinXi(models.Model):
+    ke_hu_bian_hao = models.CharField(blank=True, verbose_name=u"客户编号", max_length=200)
+    qu_yu = models.CharField(verbose_name=u"区域", max_length=200)
+    ke_hu_ming_chen = models.CharField(verbose_name=u"客户名称", max_length=200)
+    fu_ze_ren = models.CharField(verbose_name=u"负责人", max_length=200)
+    fu_ze_dian_hua = models.CharField(verbose_name=u"负责电话", max_length=200)
+    tiao_liao_yuan = models.CharField(verbose_name=u"调料员", max_length=200)
+    dian_hua = models.CharField(verbose_name=u"电话", max_length=200)
+    di_zhi = models.CharField(verbose_name=u"地址", max_length=200)
+    ye_wu = models.CharField(verbose_name=u"业务", max_length=200)
+    xin_yong_e_du = models.CharField(verbose_name=u"信用额度", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+    class Meta:
+        verbose_name = u"客户信息"
+        verbose_name_plural = verbose_name
+
+
+class ZhuangXieGong(models.Model):
+    zhuang_xie_gong = models.CharField(verbose_name=u"装卸工", max_length=200)
+    dianhua1 = models.CharField(verbose_name=u"联系电话1", max_length=200)
+    dianhua2 = models.CharField(verbose_name=u"联系电话2", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+    class Meta:
+        verbose_name = u"装卸工信息"
+        verbose_name_plural = verbose_name
+
+
+class DanWei(models.Model):
+    dan_wei_ming_cheng = models.CharField(verbose_name=u"单位名称", max_length=200)
+    lian_xi_ren = models.CharField(verbose_name=u"联系人", max_length=200)
+    lian_xi_dian_hua = models.CharField(verbose_name=u"联系电话", max_length=200)
+    lian_xi_di_zhi = models.CharField(verbose_name=u"联系地址", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+    class Meta:
+        verbose_name = u"单位信息"
+        verbose_name_plural = verbose_name
+
+
+class CheLiang(models.Model):
+    che_hao = models.CharField(verbose_name=u"车号", max_length=200)
+    si_ji = models.CharField(verbose_name=u"司机", max_length=200)
+    dian_hua1 = models.CharField(verbose_name=u"联系电话1", max_length=200)
+    dian_hua2 = models.CharField(verbose_name=u"联系电话2", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+    class Meta:
+        verbose_name = u"车辆信息"
+        verbose_name_plural = verbose_name
+
+
+class CaiGou(models.Model):
+    cai_gou_ri_qi = models.CharField(verbose_name=u"采购日期", max_length=200)
+    chang_jia = models.CharField(verbose_name=u"厂家", max_length=200)
+    chang_ku_ming_cheng = models.CharField(verbose_name=u"仓库名称", max_length=200)
+    cai_gou_fang_shi = models.CharField(verbose_name=u"采购方式", max_length=200)
+    pin_pai = models.CharField(verbose_name=u"品牌", max_length=200)
+    xing_hao = models.CharField(blank=True, verbose_name=u"型号", max_length=200)
+    gui_ge = models.CharField(verbose_name=u"规格", max_length=200)
+    dan_jia = models.CharField(verbose_name=u"单价", max_length=200)
+    shu_liang = models.CharField(verbose_name=u"数量", max_length=200)
+    jin_e = models.CharField(verbose_name=u"金额", max_length=200)
+    che_chuan_hao = models.CharField(verbose_name=u"车船号", max_length=200)
+    yun_jia = models.CharField(verbose_name=u"运价", max_length=200)
+    yun_fei = models.CharField(verbose_name=u"运费", max_length=200)
+    cao_zuo_yuan = models.CharField(verbose_name=u"操作员", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+
+    class Meta:
+        verbose_name = u"采购登记"
+        verbose_name_plural = verbose_name
+
+
+class CaiGouSunHao(models.Model):
+    ri_qi = models.CharField(verbose_name=u"日期", max_length=200)
+    cang_ku_ming_cheng = models.CharField(verbose_name=u"仓库名称", max_length=200)
+    cang_jia = models.CharField(verbose_name=u"厂家", max_length=200)
+    pin_pai = models.CharField(verbose_name=u"品牌", max_length=200)
+    xing_hao = models.CharField(verbose_name=u"型号", max_length=200)
+    gui_ge = models.CharField(blank=True, verbose_name=u"规格", max_length=200)
+    sun_hao_shu_liang = models.CharField(verbose_name=u"损耗数量", max_length=200)
+    cao_zuo_yuan = models.CharField(verbose_name=u"操作员", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+    class Meta:
+        verbose_name = u"采购损耗"
+        verbose_name_plural = verbose_name
+
+
+class XiaoShouDengJi(models.Model):
+    dan_hao = models.CharField(verbose_name=u"单号", max_length=200)
+    ri_qi = models.CharField(verbose_name=u"日期", max_length=200)
+    qu_yu = models.CharField(verbose_name=u"区域", max_length=200)
+    ke_hu_ming_cheng = models.CharField(verbose_name=u"客户名称", max_length=200)
+    che_pai_hao = models.CharField(verbose_name=u"车牌号", max_length=200)
+    si_ji = models.CharField(blank=True, verbose_name=u"司机", max_length=200)
+    si_ji_dian_hua = models.CharField(verbose_name=u"司机电话", max_length=200)
+    fu_kuan_fang_shi = models.CharField(verbose_name=u"付款方式", max_length=200)
+    jin_e = models.CharField(verbose_name=u"金额", max_length=200)
+    you_hui_jin_e = models.CharField(verbose_name=u"优惠金额", max_length=200)
+    yin_shou_jin_e = models.CharField(verbose_name=u"应收金额", max_length=200)
+    shi_shou_jin_e = models.CharField(blank=True, verbose_name=u"实收金额", max_length=200)
+    cao_zuo_yuan = models.CharField(verbose_name=u'操作员', max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+    da_yin = models.CharField(verbose_name=u"打印", max_length=200)
+
+    class Meta:
+        verbose_name = u"销售登记"
+        verbose_name_plural = verbose_name
+
+
+class SiJiJieSuan(models.Model):
+    ri_qi = models.CharField(verbose_name=u"日期", max_length=200)
+    che_pai_hao = models.CharField(verbose_name=u"车牌号", max_length=200)
+    si_ji_xing_ming = models.CharField(verbose_name=u"司机姓名", max_length=200)
+    si_ji_dian_hua = models.CharField(verbose_name=u"司机电话", max_length=200)
+    dang_qian_yun_fei = models.CharField(verbose_name=u"当前运费", max_length=200)
+    fu_yun_fei = models.CharField(blank=True, verbose_name=u"付运费", max_length=200)
+    fu_kuan_fang_shi = models.CharField(verbose_name=u"付款方式", max_length=200)
+    wei_fu_yun_fei = models.CharField(verbose_name=u"未付运费", max_length=200)
+    cao_zuo_yuan = models.CharField(verbose_name=u'操作员', max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+    da_yin = models.CharField(verbose_name=u"打印", max_length=200)
+
+    class Meta:
+        verbose_name = u"司机结算"
+        verbose_name_plural = verbose_name
+
+
+
+class ZhuangXieJieSuan(models.Model):
+    ri_qi = models.CharField(verbose_name=u"日期", max_length=200)
+    zhuang_xie_gong = models.CharField(verbose_name=u"装卸工", max_length=200)
+    dang_qian_zhuang_xie = models.CharField(verbose_name=u"当前装卸", max_length=200)
+    fu_zhuang_xie_fei = models.CharField(verbose_name=u"付装卸费", max_length=200)
+    wei_fu_zhuang_xie = models.CharField(verbose_name=u"未付装卸", max_length=200)
+    cao_zuo_yuan = models.CharField(verbose_name=u'操作员', max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+    da_yin = models.CharField(verbose_name=u"打印", max_length=200)
+
+    class Meta:
+        verbose_name = u"装卸结算"
+        verbose_name_plural = verbose_name
+
+
+class CaiGouYunFeiJieSuan(models.Model):
+    ri_qi = models.CharField(verbose_name=u"日期", max_length=200)
+    che_chuan_hao = models.CharField(verbose_name=u"车船号", max_length=200)
+    dang_qian_yun_fei = models.CharField(verbose_name=u"当前运费", max_length=200)
+    jie_suan_yun_fei = models.CharField(verbose_name=u"结算运费", max_length=200)
+    cao_zuo_yuan = models.CharField(verbose_name=u"操作员", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+    class Meta:
+        verbose_name = u"采购运费结算"
+        verbose_name_plural = verbose_name
+
+
+class ShuiNi(models.Model):
+    ri_qi = models.CharField(verbose_name=u"日期", max_length=200)
+    qu_yu = models.CharField(verbose_name=u"区域", max_length=200)
+    ke_hu_ming_cheng = models.CharField(verbose_name=u"客户名称", max_length=200)
+    wei_fu_huo_kuan = models.CharField(verbose_name=u"未付货款", max_length=200)
+    fu_kuan_jin_e = models.CharField(verbose_name=u"付款金额", max_length=200)
+    da_xie = models.CharField(verbose_name=u"大写", max_length=200)
+    fu_kuan_fang_shi = models.CharField(verbose_name=u"付款方式", max_length=200)
+    sheng_yu_huo_kuan = models.CharField(verbose_name=u"剩余货款", max_length=200)
+    cao_zuo_yuan = models.CharField(verbose_name=u"操作员", max_length=200)
+    da_yin = models.CharField(verbose_name=u"打印", max_length=200)
+
+    class Meta:
+        verbose_name = u"水泥货款"
+        verbose_name_plural = verbose_name
+
+
+class CaiGouFuKuan(models.Model):
+    ri_qi = models.CharField(verbose_name=u"日期", max_length=200)
+    cang_jia = models.CharField(verbose_name=u"厂家", max_length=200)
+    qian_kuan_jin_e = models.CharField(verbose_name=u"欠款金额", max_length=200)
+    fu_kuan_jin_e = models.CharField(verbose_name=u"付款金额", max_length=200)
+    cao_zuo_yuan = models.CharField(verbose_name=u"操作员", max_length=200)
+    da_yin = models.CharField(verbose_name=u"打印", max_length=200)
+
+    class Meta:
+        verbose_name = u"采购付款"
+        verbose_name_plural = verbose_name
+
+
+class DangQianKuCun(models.Model):
+    chang_ku_ming_cheng = models.CharField(verbose_name=u"仓库名称", max_length=200)
+    cang_jia = models.CharField(verbose_name=u"厂家", max_length=200)
+    pin_pai = models.CharField(verbose_name=u"品牌", max_length=200)
+    xing_hao = models.CharField(verbose_name=u"型号", max_length=200)
+    gui_ge = models.CharField(verbose_name=u"规格", max_length=200)
+    cai_gou_shu_liang = models.CharField(verbose_name=u"采购数量", max_length=200)
+    song_huo_shu_liang = models.CharField(verbose_name=u"送货数量", max_length=200)
+    sun_hao_shu_liang = models.CharField(verbose_name=u"损耗数量", max_length=200)
+    ku_cun_shu_liang = models.CharField(verbose_name=u"库存数量", max_length=200)
+
+    class Meta:
+        verbose_name = u"订单库存"
+        verbose_name_plural = verbose_name
 
 
 class UserProfile(AbstractUser):
@@ -25,6 +283,11 @@ class UserProfile(AbstractUser):
         default="female")
     # 地址
     address = models.CharField(max_length=100, verbose_name="地址", default="")
+    # 推荐人
+    tuijianren = models.CharField(max_length=100, verbose_name="推荐人", default="")
+
+    # 资金
+    cunkuan = models.DecimalField(verbose_name="资金", default=0, max_digits=19, decimal_places=2)
     # 电话
     mobile = models.CharField(max_length=11, null=True, blank=True, verbose_name=u"电话")
     # 头像 默认使用default.png
