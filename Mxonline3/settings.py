@@ -96,7 +96,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mxonline3',
         'USER': 'root',
-        'PASSWORD': 'tp158917',
+        'PASSWORD': '',
         'HOST':'127.0.0.1'
 
     }
@@ -150,12 +150,12 @@ STATICFILES_DIRS = [
 
 # 发送邮件的setting设置
 
-EMAIL_HOST = "smtp.qq.com"
+EMAIL_HOST = "smtp.163.com"
 EMAIL_PORT = 25
-EMAIL_HOST_USER = "mxonline@mtianyan.cn"
-EMAIL_HOST_PASSWORD = "ystfiwntwmonjebe"
+EMAIL_HOST_USER = "adao82@163.com"
+EMAIL_HOST_PASSWORD = "85564403."
 EMAIL_USE_TLS= True
-EMAIL_FROM = "mxonline@mtianyan.cn"
+EMAIL_FROM = "adao82@163.com"
 
 # 设置我们上传文件的路径
 
