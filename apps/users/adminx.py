@@ -134,6 +134,13 @@ class EmailVerifyRecordAdmin(object):
     list_filter = ['code', 'email', 'send_type', 'send_time']
 
 
+class RecordAdmin(object):
+    data_charts = {
+        "user_count": {'title': u"User Report", "x-field": "date", "y-field": ("user_count", "view_count"), "order": ('date',)},
+        "avg_count": {'title': u"Avg Report", "x-field": "date", "y-field": ('avg_count',), "order": ('date',)}
+    }
+
+
 # 创建banner的管理类
 class BannerAdmin(object):
     list_display = ['title', 'image', 'url','index', 'add_time']

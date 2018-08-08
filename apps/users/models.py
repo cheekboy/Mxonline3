@@ -33,6 +33,123 @@ class Choice(models.Model):
     votes = models.IntegerField(default=0)
 
 
+class JiFangGuanLi(models.Model):
+    ji_fang_biao_shi = models.CharField(verbose_name=u"机房标识",max_length=200)
+    ji_fang_ming_chen = models.CharField(verbose_name=u"机房名称",max_length=200)
+    ji_fang_di_zhi = models.CharField(verbose_name=u"机房地址",max_length=200)
+    ji_fang_dian_hua = models.CharField(verbose_name=u"机房电话",max_length=200)
+    ke_hu_jing_li = models.CharField(verbose_name=u"客户经理",max_length=200)
+    yi_dong_dian_hua = models.CharField(verbose_name=u"移动电话",max_length=200)
+    ji_gui_xin_xi = models.CharField(verbose_name=u"机柜信息",max_length=200)
+    jie_ru_dai_kuan = models.CharField(verbose_name=u"接入带宽",max_length=200)
+    bei_zhu_xin_xi = models.CharField(verbose_name=u"备注信息",max_length=200)
+
+    class Meta:
+        verbose_name = u"机房管理"
+        verbose_name_plural = verbose_name
+
+class ShuZuGuanLi(models.Model):
+    fu_wu_qi_zu = models.CharField(verbose_name=u"服务器组",max_length=200)
+    miao_su = models.CharField(verbose_name=u"描述",max_length=200)
+    ke_xuan_fu_wu_qi = models.CharField(verbose_name=u"可选择服务器",max_length=200)
+
+    class Meta:
+        verbose_name = u"机房管理"
+        verbose_name_plural = verbose_name
+
+
+class ZhuJiGuanLi(models.Model):
+    zu_ji_ming = models.CharField(verbose_name=u"主机名",max_length=200)
+    guan_li_ip = models.CharField(verbose_name=u"管理ip",max_length=200)
+    suo_zai_ji_fang = models.CharField(verbose_name=u"所在机房",max_length=200)
+    qi_ta_ip = models.CharField(verbose_name=u"其他ip",max_length=200)
+    zi_can = models.CharField(verbose_name=u"资产",max_length=200)
+    she_bei_lei_xing = models.CharField(verbose_name=u"设备类型",max_length=200)
+    she_bei_zhuang_tai = models.CharField(verbose_name=u"设备状态",max_length=200)
+    cao_zuo_xi_tong = models.CharField(verbose_name=u"操作系统",max_length=200)
+    she_bei_chang_shang = models.CharField(verbose_name=u"设备厂商",max_length=200)
+    shang_jia_shi_jian = models.CharField(verbose_name=u"上架时间",max_length=200)
+    cpu_xing_hao = models.CharField(verbose_name=u"CPU型号",max_length=200)
+    cpu_shu_liang = models.CharField(verbose_name=u"cpu数量",max_length=200)
+    nei_cun_da_xiao = models.CharField(verbose_name=u"内存大小",max_length=200)
+    ying_pan_xin_xi = models.CharField(verbose_name=u"硬盘信息",max_length=200)
+    SN_hao_ma = models.CharField(verbose_name=u"SN号码",max_length=200)
+    suo_zai_wei_zhi = models.CharField(verbose_name=u"所在位置",max_length=200)
+    bei_zhu_xin_xi = models.CharField(verbose_name=u"备注信息",max_length=200)
+
+    class Meta:
+        verbose_name = u"主机管理"
+        verbose_name_plural = verbose_name
+
+
+
+class ChanPinGuanLi(models.Model):
+    can_pin_ming_chen = models.CharField(verbose_name=u"产品名称",max_length=200)
+    can_pin_miao_shu = models.CharField(verbose_name=u"产品描述",max_length=200)
+    can_pin_fu_ze_ren = models.CharField(verbose_name=u"产品负责人",max_length=200)
+
+    class Meta:
+        verbose_name = u"产品管理"
+        verbose_name_plural = verbose_name
+
+
+class XiangMuGuanLi(models.Model):
+    xiang_mu_ming_chen = models.CharField(verbose_name=u"项目名称",max_length=200)
+    xiang_mu_miao_su = models.CharField(verbose_name=u"项目描述",max_length=200)
+    yu_yan_lei_xing = models.CharField(verbose_name=u"语言类型",max_length=200)
+    cheng_xu_lei_xing = models.CharField(verbose_name=u"程序类型",max_length=200)
+    fu_wu_qi_lei_xing = models.CharField(verbose_name=u"服务器类型",max_length=200)
+    yuan_lei_xing = models.CharField(verbose_name=u"源类型",max_length=200)\
+    yuan_di_zhi= models.CharField(verbose_name=u"源地址",max_length=200)
+    cheng_xu_bu_shu_lu_jing = models.CharField(verbose_name=u"程序部署路径",max_length=200)
+    pei_zhi_wen_jian = models.CharField(verbose_name=u"配置文件路径",max_length=200)
+    suo_su_chan_pin = models.CharField(verbose_name=u"所属产品",max_length=200)
+    xiang_mu_fu_ze_ren = models.CharField(verbose_name=u"项目负责人",max_length=200)
+    suo_zai_fu_wu_qi = models.CharField(verbose_name=u"所在服务器",max_length=200)
+
+    class Meta:
+        verbose_name = u"项目管理"
+        verbose_name_plural = verbose_name
+
+
+class FuZeRen(models.Model):
+    fu_ze_ren = models.CharField(verbose_name=u"负责人姓名",max_length=200)
+    fu_ze_ren_shou_ji = models.CharField(verbose_name=u"负责人手机",max_length=200)
+    fu_ze_ren_qq = models.CharField(verbose_name=u"负责人qq",max_length=200)
+    fu_ze_ren_wechat = models.CharField(verbose_name=u"负责人微信",max_length=200)
+
+    class Meta:
+        verbose_name = u"负责人管理"
+        verbose_name_plural = verbose_name
+
+
+class ChiXuJiaoFu(models.Model):
+    xiang_mu_ming = models.CharField(verbose_name=u"项目名",max_length=200)
+    xiang_mu_miaosu = models.CharField(verbose_name=u"项目描述",max_length=200)
+    ban_ben_xin_xi = models.CharField(verbose_name=u"版本信息",max_length=200)
+    shell = models.CharField(verbose_name=u"shell",max_length=200)
+
+    class Meta:
+        verbose_name = u"持续交付"
+        verbose_name_plural = verbose_name
+
+
+class JiZhangYuan(models.Model):
+    ji_zhang_yuan = models.CharField(verbose_name=u"供商名称",max_length=200)
+
+    class Meta:
+        verbose_name = u"记账员"
+        verbose_name_plural = verbose_name
+
+
+class GuanKuYuan(models.Model):
+    guan_ku_yuan = models.CharField(verbose_name=u"供商名称",max_length=200)
+
+    class Meta:
+        verbose_name = u"记账员"
+        verbose_name_plural = verbose_name
+
+
 class GongShangXinXi(models.Model):
     gong_shang_ming_chen = models.CharField(verbose_name=u"供商名称",max_length=200)
     lian_xi_ren =  models.CharField(verbose_name=u"联系人",max_length=200)
