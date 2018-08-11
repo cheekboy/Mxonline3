@@ -33,6 +33,25 @@ class GlobalSettings(object):
 
     def get_site_menu(self):
         return (
+            {'title': '资产管理', 'menus': (
+                {'title': 'dns管理', 'url': self.get_model_url(Dns, 'changelist')},
+                {'title': 'dnsip管理', 'url': self.get_model_url(DnsIp, 'changelist')},
+                {'title': '机房管理', 'url': self.get_model_url(JiFangGuanLi, 'changelist')},
+                #{'title': '宿组管理', 'url': self.get_model_url(ShuZuGuanLi, 'changelist')},
+                {'title': '主机管理', 'url': self.get_model_url(ZhuJiGuanLi, 'changelist')},
+
+            )},
+            {'title': '产品线管理', 'menus': (
+                {'title': '产品管理', 'url': self.get_model_url(ChanPinGuanLi, 'changelist')},
+                {'title': '项目管理', 'url': self.get_model_url(XiangMuGuanLi, 'changelist')},
+                {'title': '负责人管理', 'url': self.get_model_url(FuZeRen, 'changelist')},
+
+            )},
+            {'title': '持续交付', 'menus': (
+                {'title': '持续交付', 'url': self.get_model_url(ChiXuJiaoFu, 'changelist')},
+
+            )},
+
             {'title': '基本信息', 'menus': (
                 {'title': '供应商信息', 'url': self.get_model_url(GongShangXinXi, 'changelist')},
                 {'title': '水泥信息', 'url': self.get_model_url(ShuiNiXinXi, 'changelist')},
@@ -298,6 +317,87 @@ class DangQianKuCunAdmin(object):
 
 xadmin.site.register(DangQianKuCun, DangQianKuCunAdmin)
 
+
+# 创建域名管理类
+class DnsAdmin(object):
+    list_display = ['name']
+
+
+# 创建域名ip管理类
+class DnsIpAdmin(object):
+    list_display = ['yu_ming','zhu_ji_ji_lu', 'ji_lu_zhi', 'ip']
+#    search_fields = ['gong_shang_ming_chen']
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+xadmin.site.register(Dns, DnsAdmin)
+xadmin.site.register(DnsIp, DnsIpAdmin)
+
+
+
+# 创建机房管理类
+class JiFangGuanLiAdmin(object):
+    list_display = ['ji_fang_biao_shi', 'ji_fang_ming_chen', 'ji_fang_di_zhi']
+#    search_fields = ['gong_shang_ming_chen']
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+xadmin.site.register(JiFangGuanLi, JiFangGuanLiAdmin)
+
+
+# 创建宿组管理类
+class ShuZuGuanliAdmin(object):
+    list_display = ['fu_wu_qi_zu', ['miao_su'],['ke_xuan_fu_wu_qi']]
+
+
+# 创建主机管理类
+class ZhuJiGuanLiAdmin(object):
+    list_display = ['zu_ji_ming','guan_li_ip', 'suo_zai_ji_fang', 'qi_ta_ip', 'zi_can', 'she_bei_lei_xing', 'shang_jia_shi_jian', 'cpu_xing_hao', 'cpu_shu_liang', 'nei_cun_da_xiao', 'ying_pan_xin_xi', 'SN_hao_ma', 'suo_zai_wei_zhi', 'bei_zhu_xin_xi']
+#    search_fields = ['gong_shang_ming_chen']
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+#xadmin.site.register(ShuZuGuanli, ShuZuGuanLiAdmin)
+xadmin.site.register(ZhuJiGuanLi, ZhuJiGuanLiAdmin)
+
+
+# 创建产品管理类
+class ChanPinGuanLiAdmin(object):
+    list_display = ['zhu_ji_ming', 'guan_li_ip']
+#    search_fields = ['gong_shang_ming_chen']
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+xadmin.site.register(ChanPinGuanLi, ChanPinGuanLiAdmin)
+
+
+# 创建项目管理类
+class XiangMuGuanLiAdmin(object):
+    list_display = ['xiang_mu_ming_chen', 'xiang_mu_miao_su', 'yu_yan_lei_xing', 'cheng_xu_lei_xing']
+#    search_fields = ['gong_shang_ming_chen']
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+xadmin.site.register(XiangMuGuanLi, XiangMuGuanLiAdmin)
+
+
+# 创建负责人管理类
+class FuZeRenAdmin(object):
+    list_display = ['fu_ze_ren', 'shou_ji', 'qq', 'wechat']
+#    search_fields = ['gong_shang_ming_chen']
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+xadmin.site.register(FuZeRen, FuZeRenAdmin)
+
+
+# 创建负责人管理类
+class ChiXuJiaoFuAdmin(object):
+    pass
+#    list_display = ['fu_ze_ren', 'shou_ji', 'qq', 'wei_chat']
+#    search_fields = ['gong_shang_ming_chen']
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+xadmin.site.register(ChiXuJiaoFu, ChiXuJiaoFuAdmin)
 
 
 # 将model与admin管理器进行关联注册

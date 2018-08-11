@@ -33,6 +33,29 @@ class Choice(models.Model):
     votes = models.IntegerField(default=0)
 
 
+class Dns(models.Model):
+
+    name = models.CharField(verbose_name=u"域名", max_length=200)
+    bei_zhu = models.CharField(verbose_name=u"备注", max_length=200)
+
+    class Meta:
+        verbose_name = u"域名"
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return '{0}'.format(self.name)
+
+class DnsIp(models.Model):
+    yu_ming = models.ForeignKey(Dns, on_delete=models.CASCADE, verbose_name=u"域名")
+    zhu_ji_ji_lu = models.CharField(verbose_name="主机记录", max_length=200)
+    ji_lu_zhi = models.CharField(verbose_name=u"记录值",max_length=200)
+    ip = models.CharField(verbose_name=u"ip",max_length=200)
+
+    class Meta:
+        verbose_name = u"负责人管理"
+        verbose_name_plural = verbose_name
+
+
+
 class JiFangGuanLi(models.Model):
     ji_fang_biao_shi = models.CharField(verbose_name=u"机房标识",max_length=200)
     ji_fang_ming_chen = models.CharField(verbose_name=u"机房名称",max_length=200)
@@ -48,6 +71,7 @@ class JiFangGuanLi(models.Model):
         verbose_name = u"机房管理"
         verbose_name_plural = verbose_name
 
+
 class ShuZuGuanLi(models.Model):
     fu_wu_qi_zu = models.CharField(verbose_name=u"服务器组",max_length=200)
     miao_su = models.CharField(verbose_name=u"描述",max_length=200)
@@ -59,6 +83,7 @@ class ShuZuGuanLi(models.Model):
 
 
 class ZhuJiGuanLi(models.Model):
+    yu_ming = models.ForeignKey(Dns, on_delete=models.CASCADE, verbose_name=u"域名")
     zu_ji_ming = models.CharField(verbose_name=u"主机名",max_length=200)
     guan_li_ip = models.CharField(verbose_name=u"管理ip",max_length=200)
     suo_zai_ji_fang = models.CharField(verbose_name=u"所在机房",max_length=200)
@@ -99,8 +124,8 @@ class XiangMuGuanLi(models.Model):
     yu_yan_lei_xing = models.CharField(verbose_name=u"语言类型",max_length=200)
     cheng_xu_lei_xing = models.CharField(verbose_name=u"程序类型",max_length=200)
     fu_wu_qi_lei_xing = models.CharField(verbose_name=u"服务器类型",max_length=200)
-    yuan_lei_xing = models.CharField(verbose_name=u"源类型",max_length=200)\
-    yuan_di_zhi= models.CharField(verbose_name=u"源地址",max_length=200)
+    yuan_lei_xing = models.CharField(verbose_name=u"源类型",max_length=200)
+    yuan_di_zhi = models.CharField(verbose_name=u"源地址",max_length=200)
     cheng_xu_bu_shu_lu_jing = models.CharField(verbose_name=u"程序部署路径",max_length=200)
     pei_zhi_wen_jian = models.CharField(verbose_name=u"配置文件路径",max_length=200)
     suo_su_chan_pin = models.CharField(verbose_name=u"所属产品",max_length=200)
@@ -114,9 +139,9 @@ class XiangMuGuanLi(models.Model):
 
 class FuZeRen(models.Model):
     fu_ze_ren = models.CharField(verbose_name=u"负责人姓名",max_length=200)
-    fu_ze_ren_shou_ji = models.CharField(verbose_name=u"负责人手机",max_length=200)
-    fu_ze_ren_qq = models.CharField(verbose_name=u"负责人qq",max_length=200)
-    fu_ze_ren_wechat = models.CharField(verbose_name=u"负责人微信",max_length=200)
+    shou_ji = models.CharField(verbose_name=u"负责人手机",max_length=200)
+    qq = models.CharField(verbose_name=u"负责人qq",max_length=200)
+    wechat = models.CharField(verbose_name=u"负责人微信",max_length=200)
 
     class Meta:
         verbose_name = u"负责人管理"
