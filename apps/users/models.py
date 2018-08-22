@@ -27,6 +27,98 @@ class AssetProject(models.Model):
         return self.projects
 
 
+class RunDdos(models.Model):
+    name = models.CharField(verbose_name=u"Domain名称",max_length=200)
+
+    class Meta:
+        verbose_name = u"创建ddos防护服务"
+        verbose_name_plural = verbose_name
+
+
+class RunDocker(models.Model):
+    Name = models.CharField(verbose_name=u"名称",max_length=200)
+    Number = models.CharField(verbose_name=u"数量",max_length=200)
+    env = models.CharField(verbose_name=u"环境变量",max_length=200)
+    readiness = models.CharField(verbose_name=u"readiness",max_length=200)
+    liveness = models.CharField(verbose_name=u"liveness",max_length=200)
+    images = models.CharField(verbose_name=u"images",max_length=200)
+
+    class Meta:
+        verbose_name = u"创建pod"
+        verbose_name_plural = verbose_name
+
+
+class Project(models.Model):
+    ip = models.CharField(verbose_name=u"名称",max_length=200)
+    ji_fang_dian_hua = models.CharField(verbose_name=u"docker镜像",max_length=200)
+    ke_hu_jing_li = models.CharField(verbose_name=u"数量",max_length=200)
+    env = models.CharField(verbose_name=u"环境变量",max_length=200)
+    readiness = models.CharField(verbose_name=u"readiness",max_length=200)
+    liveness = models.CharField(verbose_name=u"liveness",max_length=200)
+    bei_zhu_xin_xi = models.CharField(verbose_name=u"备注信息",max_length=200)
+
+    class Meta:
+        verbose_name = u"创建pod"
+        verbose_name_plural = verbose_name
+
+
+class Ingress(models.Model):
+    ip = models.CharField(verbose_name=u"名称",max_length=200)
+    ji_fang_dian_hua = models.CharField(verbose_name=u"docker镜像",max_length=200)
+    ke_hu_jing_li = models.CharField(verbose_name=u"数量",max_length=200)
+    env = models.CharField(verbose_name=u"环境变量",max_length=200)
+    readiness = models.CharField(verbose_name=u"readiness",max_length=200)
+    liveness = models.CharField(verbose_name=u"liveness",max_length=200)
+    bei_zhu_xin_xi = models.CharField(verbose_name=u"备注信息",max_length=200)
+
+    class Meta:
+        verbose_name = u"创建pod"
+        verbose_name_plural = verbose_name
+
+
+class Pod(models.Model):
+    ip = models.CharField(verbose_name=u"名称",max_length=200)
+    ji_fang_dian_hua = models.CharField(verbose_name=u"docker镜像",max_length=200)
+    ke_hu_jing_li = models.CharField(verbose_name=u"数量",max_length=200)
+    env = models.CharField(verbose_name=u"环境变量",max_length=200)
+    readiness = models.CharField(verbose_name=u"readiness",max_length=200)
+    liveness = models.CharField(verbose_name=u"liveness",max_length=200)
+    bei_zhu_xin_xi = models.CharField(verbose_name=u"备注信息",max_length=200)
+
+    class Meta:
+        verbose_name = u"创建pod"
+        verbose_name_plural = verbose_name
+
+
+class Service(models.Model):
+    ip = models.CharField(verbose_name=u"名称",max_length=200)
+    ji_fang_dian_hua = models.CharField(verbose_name=u"docker镜像",max_length=200)
+    ke_hu_jing_li = models.CharField(verbose_name=u"数量",max_length=200)
+    env = models.CharField(verbose_name=u"环境变量",max_length=200)
+    readiness = models.CharField(verbose_name=u"readiness",max_length=200)
+    liveness = models.CharField(verbose_name=u"liveness",max_length=200)
+    bei_zhu_xin_xi = models.CharField(verbose_name=u"备注信息",max_length=200)
+
+    class Meta:
+        verbose_name = u"创建服务"
+        verbose_name_plural = verbose_name
+
+
+
+class ZhuJiip(models.Model):
+    ip = models.CharField(verbose_name=u"机房地址",max_length=200)
+    ji_fang_dian_hua = models.CharField(verbose_name=u"机房电话",max_length=200)
+    ke_hu_jing_li = models.CharField(verbose_name=u"客户经理",max_length=200)
+    yi_dong_dian_hua = models.CharField(verbose_name=u"移动电话",max_length=200)
+    ji_gui_xin_xi = models.CharField(verbose_name=u"机柜信息",max_length=200)
+    jie_ru_dai_kuan = models.CharField(verbose_name=u"接入带宽",max_length=200)
+    bei_zhu_xin_xi = models.CharField(verbose_name=u"备注信息",max_length=200)
+
+    class Meta:
+        verbose_name = u"高防ip"
+        verbose_name_plural = verbose_name
+
+
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200)
