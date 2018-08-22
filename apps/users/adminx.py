@@ -7,6 +7,8 @@ __date__ = '2018/1/9 0009 08:02'
 import xadmin
 from django.contrib.auth.models import Group, Permission
 from users.models import *
+import os
+import subprocess
 
 from operation.models import CourseComments, UserFavorite, UserMessage, UserCourse, UserAsk
 from organization.models import CityDict, Teacher, CourseOrg
@@ -17,12 +19,93 @@ from xadmin import views
 
 from .models import EmailVerifyRecord, Banner, UserProfile
 
+from django.http import HttpResponse
+from xadmin.plugins.actions import BaseActionView
+
+
+class MyAction(BaseActionView):
+    # 这里需要填写三个属性
+    action_name = "change_sss"    #: 相当于这个 Action 的唯一标示, 尽量用比较针对性的名字
+    description = u'Test selected %(verbose_name_plural)s'
+    model_perm = 'change'
+
+    def do_action(self, queryset):
+        for obj in queryset:
+            envarray=obj.env.split(",")
+            senv = """          - name: {0}
+            value: \"{1}\"
+"""
+            senvall=""
+            for item in envarray:
+                itemarray = item.split("=")
+                senvall=senvall+senv.format(itemarray[0],itemarray[1])
+            s ="""
+cat <<EOF > ~/test.txt
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+    name: red-nginx{0}
+spec:
+    replicas: {1} 
+    template:
+      metadata:
+        labels: 
+          app: red-nginx{0}
+      spec:
+        containers:
+        - name: nginx{0}
+          image: aontimer/{0}
+          ports:
+          - containerPort: 80
+          env:
+          - name: DEMO_GREETING
+            value: "Hello from the environment"
+{2}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: red-service{0}
+spec:
+  type: NodePort
+  selector:
+    app: red-nginx{0}
+  ports:
+    - protocol: TCP
+      port: 80
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web{0}
+spec:
+  rules:
+  - host: {0}.myweb.com
+    http:
+      paths:
+      - backend:
+          serviceName: red-service{0}
+          servicePort: 80
+EOF
+
+rancher kubectl create -f ~/test.txt
+""".format(obj.images,obj.Number,senvall)
+            os.system(s)
+
+            #其实我们做的只有这一部分 ********
+            #obj.images += 'sss'
+            #obj.save()
+        return HttpResponse('{0}'.format(s), content_type='application/json')
+
 
 # X admin的全局配置信息设置
 class BaseSetting(object):
     # 主题功能开启
     enable_themes = True
     use_bootswatch = True
+
 
 # x admin 全局配置参数信息设置
 class GlobalSettings(object):
@@ -33,6 +116,13 @@ class GlobalSettings(object):
 
     def get_site_menu(self):
         return (
+            {'title': 'DDos防御管理', 'menus': (
+                {'title': 'DDos防御管理', 'url': self.get_model_url(RunDdos, 'changelist')},
+            )},
+
+            {'title': 'k8s管理', 'menus': (
+                {'title': 'images管理', 'url': self.get_model_url(RunDocker, 'changelist')},
+            )},
             {'title': '资产管理', 'menus': (
                 {'title': 'dns管理', 'url': self.get_model_url(Dns, 'changelist')},
                 {'title': 'dnsip管理', 'url': self.get_model_url(DnsIp, 'changelist')},
@@ -166,6 +256,25 @@ class BannerAdmin(object):
     search_fields = ['title', 'image', 'url','index']
     list_filter = ['title', 'image', 'url','index', 'add_time']
 
+
+# 创建供应商的管理类
+class RunDdosAdmin(object):
+    list_display = ['name']
+    search_fields = ['name']
+    actions =[MyAction,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+xadmin.site.register(RunDdos, RunDdosAdmin)
+
+# 创建供应商的管理类
+class RunDockerAdmin(object):
+    list_display = ['Name', 'Number', 'env', 'images', 'liveness']
+    search_fields = ['Name']
+    actions =[MyAction,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+xadmin.site.register(RunDocker, RunDockerAdmin)
 
 
 # 创建供应商的管理类
