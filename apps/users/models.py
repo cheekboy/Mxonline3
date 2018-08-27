@@ -26,6 +26,23 @@ class AssetProject(models.Model):
     def __str__(self):
         return self.projects
 
+class AliKey(models.Model):
+    ak_id = models.CharField(verbose_name=u"id",max_length=200)
+    ak_secret = models.CharField(verbose_name=u"key密码",max_length=200)
+    security_group_id = models.CharField(verbose_name=u"安全组",max_length=200)
+    vswitch_id =  models.CharField(verbose_name=u"vswitch",max_length=200)
+    class Meta:
+        verbose_name = u"阿里key"
+        verbose_name_plural = verbose_name
+
+class AliEcs(models.Model):
+    name = models.CharField(verbose_name=u"name",max_length=200)
+    ip = models.CharField(verbose_name=u"ip",max_length=200)
+
+    class Meta:
+        verbose_name = u"阿里ecs服务器"
+        verbose_name_plural = verbose_name
+
 
 class RunDdos(models.Model):
     name = models.CharField(verbose_name=u"Domain名称",max_length=200)

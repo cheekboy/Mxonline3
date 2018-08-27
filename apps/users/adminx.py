@@ -1,13 +1,12 @@
 # encoding: utf-8
 from courses.models import Course, Video, Lesson, CourseResource
 
-__author__ = 'mtianyan'
-__date__ = '2018/1/9 0009 08:02'
-
+__author__ = 'jiangming'
+__date__ = '2018/8/29 0009 08:02'
 import xadmin
 from django.contrib.auth.models import Group, Permission
 from users.models import *
-import os
+import os,json,re
 import subprocess
 
 from operation.models import CourseComments, UserFavorite, UserMessage, UserCourse, UserAsk
@@ -21,6 +20,138 @@ from .models import EmailVerifyRecord, Banner, UserProfile
 
 from django.http import HttpResponse
 from xadmin.plugins.actions import BaseActionView
+
+
+
+
+class MyActionCeateEcs(BaseActionView):
+    # 这里需要填写三个属性
+    action_name = "创建ecs服务器"    #: 相当于这个 Action 的唯一标示, 尽量用比较针对性的名字
+    description = u'创建服务器%(verbose_name_plural)s'
+    model_perm = 'change'
+
+    def do_action(self, queryset):
+        for obj in queryset:
+            alikey = AliKey.objects.get(id=1)
+            #response= regecs.main(alikey.ak_id, alikey.ak_secret)
+            s = """
+cat <<EOF > ~/test.py
+import json
+import logging
+import time
+from aliyunsdkcore import client
+from aliyunsdkecs.request.v20140526.DescribeInstancesRequest import DescribeInstancesRequest
+from aliyunsdkecs.request.v20140526.RunInstancesRequest import RunInstancesRequest
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S')
+ak_id = "LTAIGVXfVgRPT6Kc"
+ak_secret = "KRxRClg5iQ5scvHs4cD9l9OBakjXFe"
+region_id = "cn-hangzhou"
+# your expected instance type
+instance_type = "ecs.xn4.small"
+vswitch_id = "vsw-bp13yqlcg81ewswreibb5"
+image_id = "centos_7_03_64_20G_alibase_20170818.vhd"
+security_group_id = "sg-bp15ylvdo8ouhytt6eqg"
+amount = 1;
+auto_release_time = "2018-12-05T22:40:00Z"
+clt = client.AcsClient(ak_id, ak_secret, region_id)
+runtime=0;
+
+
+# create instance automatic running
+def batch_create_instance():
+    request = build_request()
+    request.set_Amount(amount)
+    _execute_request(request)
+
+
+# create instance with public ip.
+def batch_create_instance_with_public_ip():
+    request = build_request()
+    request.set_Amount(amount)
+    request.set_InternetMaxBandwidthOut(1)
+    _execute_request(request)
+
+
+# create instance with auto release time.
+def batch_create_instance_with_auto_release_time():
+    request = build_request()
+    request.set_Amount(amount)
+    request.set_AutoReleaseTime(auto_release_time)
+    _execute_request(request)
+
+
+def _execute_request(request):
+    response = _send_request(request)
+    if response.get('Code') is None:
+        instance_ids = response.get('InstanceIdSets').get('InstanceIdSet')
+        running_amount = 0
+        while running_amount < amount:
+            time.sleep(15)
+            running_amount = check_instance_running(instance_ids)
+    #print("ecs instance %s is running", instance_ids)
+
+
+def check_instance_running(instance_ids):
+    request = DescribeInstancesRequest()
+    request.set_InstanceIds(json.dumps(instance_ids))
+    response = _send_request(request)
+    if response.get('Code') is None:
+        instances_list = response.get('Instances').get('Instance')
+        running_count = 0
+        for instance_detail in instances_list:
+            if instance_detail.get('Status') == "Starting":
+                running_count += 1
+        return running_count
+
+
+def build_request():
+    request = RunInstancesRequest()
+    request.set_ImageId(image_id)
+    request.set_VSwitchId(vswitch_id)
+    request.set_SecurityGroupId(security_group_id)
+    request.set_InstanceName("Instance12-04")
+    request.set_InstanceType(instance_type)
+    return request
+
+
+# send open api request
+def _send_request(request):
+    global runtime
+    request.set_accept_format('json')
+    try:
+        response_str = clt.do_action(request)
+        if runtime > 0:
+            logging.info(response_str)
+            print(response_str)
+        runtime+=1
+        response_detail = json.loads(response_str)
+        return response_detail
+    except Exception as e:
+        logging.error(e)
+
+
+if __name__ == '__main__':
+    batch_create_instance()
+    # batch_create_instance_with_public_ip()
+    # batch_create_instance_with_auto_release_time()
+EOF
+
+python3 ~/test.py
+            """
+            regex = re.compile(r'\\(?![/u"])')
+
+            str = os.popen(s).read().replace("b'","").replace("'","")
+            str = regex.sub(r"\\\\", str)
+            return1=json.loads(str)
+            obj.ip=return1['Instances']['Instance'][0]["NetworkInterfaces"]['NetworkInterface'][0]['PrimaryIpAddress']
+            #其实我们做的只有这一部分 ********
+            #obj.images += 'sss'
+            obj.save()
+        return HttpResponse('{0}'.format(str), content_type='application/json')
+
+
 
 
 class MyAction(BaseActionView):
@@ -116,6 +247,11 @@ class GlobalSettings(object):
 
     def get_site_menu(self):
         return (
+            {'title': '阿里服务器', 'menus': (
+                {'title': 'key管理', 'url': self.get_model_url(AliKey, 'changelist')},
+                {'title': 'Ecs管理', 'url': self.get_model_url(AliEcs, 'changelist')},
+            )},
+
             {'title': 'DDos防御管理', 'menus': (
                 {'title': 'DDos防御管理', 'url': self.get_model_url(RunDdos, 'changelist')},
             )},
@@ -256,6 +392,27 @@ class BannerAdmin(object):
     search_fields = ['title', 'image', 'url','index']
     list_filter = ['title', 'image', 'url','index', 'add_time']
 
+
+# 创建阿里云key的管理类
+class AliKeyAdmin(object):
+    search_fields = ['ali_id']
+#    list_display = ['name']
+#    search_fields = ['name']
+#    actions =[MyAction,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+# 创建阿里云Ecs的管理类
+class AliEcsAdmin(object):
+    search_fields = ['ip']
+
+#    list_display = ['name']
+#    search_fields = ['name']
+    actions =[MyActionCeateEcs,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+xadmin.site.register(AliKey, AliKeyAdmin)
+xadmin.site.register(AliEcs, AliEcsAdmin)
 
 # 创建供应商的管理类
 class RunDdosAdmin(object):
