@@ -26,11 +26,27 @@ class AssetProject(models.Model):
     def __str__(self):
         return self.projects
 
+
+class AccessRecord(models.Model):
+    date = models.DateField()
+    user_count = models.IntegerField()
+    view_count = models.IntegerField()
+
+    class Meta:
+        verbose_name = u"Access Record"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "%s Access Record" % self.date.strftime('%Y-%m-%d')
+
+
 class AliKey(models.Model):
     ak_id = models.CharField(verbose_name=u"id",max_length=200)
     ak_secret = models.CharField(verbose_name=u"key密码",max_length=200)
     security_group_id = models.CharField(verbose_name=u"安全组",max_length=200)
+    aliyun_images = models.CharField(verbose_name=u"aliyun初始化镜像",max_length=200)
     vswitch_id =  models.CharField(verbose_name=u"vswitch",max_length=200)
+    init_script = models.CharField(verbose_name=u"vswitch", max_length=8000)
     class Meta:
         verbose_name = u"阿里key"
         verbose_name_plural = verbose_name

@@ -22,6 +22,38 @@ from django.http import HttpResponse
 from xadmin.plugins.actions import BaseActionView
 
 
+@xadmin.sites.register(AccessRecord)
+class AccessRecordAdmin(object):
+    def avg_count(self, instance):
+        return int(instance.view_count / instance.user_count)
+
+    avg_count.short_description = "Avg Count"
+    avg_count.allow_tags = True
+    avg_count.is_column = True
+
+    list_display = ("date", "user_count", "view_count", "avg_count")
+    list_display_links = ("date",)
+
+    list_filter = ["date", "user_count", "view_count"]
+    actions = None
+    aggregate_fields = {"user_count": "sum", "view_count": "sum"}
+
+    refresh_times = (3, 5, 10)
+    data_charts = {
+        "user_count": {'title': u"User Report", "x-field": "date", "y-field": ("user_count", "view_count"),
+                       "order": ('date',)},
+        "avg_count": {'title': u"Avg Report", "x-field": "date", "y-field": ('avg_count',), "order": ('date',)},
+        "per_month": {'title': u"Monthly Users", "x-field": "_chart_month", "y-field": ("user_count",),
+                      "option": {
+                          "series": {"bars": {"align": "center", "barWidth": 0.8, 'show': True}},
+                          "xaxis": {"aggregate": "sum", "mode": "categories"},
+                      },
+                      },
+    }
+
+    def _chart_month(self, obj):
+        return obj.date.strftime("%B")
+
 
 
 class MyActionCeateEcs(BaseActionView):
@@ -45,14 +77,14 @@ from aliyunsdkecs.request.v20140526.RunInstancesRequest import RunInstancesReque
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
-ak_id = "LTAIGVXfVgRPT6Kc"
-ak_secret = "KRxRClg5iQ5scvHs4cD9l9OBakjXFe"
+ak_id = "{0}"
+ak_secret = "{1}"
 region_id = "cn-hangzhou"
 # your expected instance type
 instance_type = "ecs.xn4.small"
-vswitch_id = "vsw-bp13yqlcg81ewswreibb5"
-image_id = "centos_7_03_64_20G_alibase_20170818.vhd"
-security_group_id = "sg-bp15ylvdo8ouhytt6eqg"
+vswitch_id = "{2}"
+image_id = "{4}"
+security_group_id = "{3}"
 amount = 1;
 auto_release_time = "2018-12-05T22:40:00Z"
 clt = client.AcsClient(ak_id, ak_secret, region_id)
@@ -139,7 +171,7 @@ if __name__ == '__main__':
 EOF
 
 python3 ~/test.py
-            """
+            """.format(alikey.ak_id,alikey.ak_secret,alikey.vswitch_id,alikey,security_group_id,alikey.aliyun_images)
             regex = re.compile(r'\\(?![/u"])')
 
             str = os.popen(s).read().replace("b'","").replace("'","")
@@ -250,6 +282,8 @@ class GlobalSettings(object):
             {'title': '阿里服务器', 'menus': (
                 {'title': 'key管理', 'url': self.get_model_url(AliKey, 'changelist')},
                 {'title': 'Ecs管理', 'url': self.get_model_url(AliEcs, 'changelist')},
+                {'title': '初始化脚本', 'url': self.get_model_url(AccessRecord, 'changelist')},
+
             )},
 
             {'title': 'DDos防御管理', 'menus': (
