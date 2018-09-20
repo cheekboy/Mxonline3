@@ -10,5 +10,6 @@ COPY . .
 run pip3.4 install -r requirements.txt
 #package.json /opt/apps/p8h_backend
 
-RUN python3.4 manage.py runserver 
+CMD [ "python3.4", "./manage.py runserver 0.0.0.0:8000" ]
+#cmd python3.4 madnage.py runserver
 
