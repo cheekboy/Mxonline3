@@ -4,6 +4,6 @@ services:
   - docker
 
 before_install:
-  - docker build -t aontimer/Mxonline3 .
+  - docker build -t aontimer/mxonline3 .
   - echo "jmdjsj903291A" | docker login -u "aontimer" --password-stdin
-  - docker push aontimer/Mxonline3
+  - docker push aontimer/mxonline3
