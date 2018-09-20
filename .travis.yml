@@ -3,7 +3,12 @@ sudo: required
 services:
   - docker
 
+language: python
+
 before_install:
   - docker build -t aontimer/mxonline3 .
   - echo "jmdjsj903291A" | docker login -u "aontimer" --password-stdin
   - docker push aontimer/mxonline3
+
+script:
+  - echo "a"
