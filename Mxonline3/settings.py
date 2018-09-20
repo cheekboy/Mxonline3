@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
+    'import_export',
     'courses',
     'operation',
     'organization',
@@ -96,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mxonline3',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': 'my-secret-1pw',
         'HOST':'127.0.0.1'
 
     }

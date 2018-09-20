@@ -84,3 +84,12 @@ class Teacher(models.Model):
 
     def __str__(self):
         return "[{0}]的教师: {1}".format(self.org, self.name)
+
+class P8logo(models.Model):
+    name = models.CharField(verbose_name=u"用户名",max_length=200)
+    pid = models.CharField(verbose_name=u"密码",max_length=200)
+    class Meta:
+        verbose_name = u"医院logo"
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return "%s" % self.name

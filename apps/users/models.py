@@ -40,16 +40,86 @@ class AccessRecord(models.Model):
         return "%s Access Record" % self.date.strftime('%Y-%m-%d')
 
 
+class AliJenkins(models.Model):
+    jobname = models.CharField(verbose_name=u"jobname",max_length=200)
+    Branchname = models.CharField(verbose_name=u"分支名",max_length=200)
+    class Meta:
+        verbose_name = u"阿里cd自动构建"
+        verbose_name_plural = verbose_name
+
+
 class AliKey(models.Model):
+    username = models.CharField(verbose_name=u"用户名",max_length=200)
+    password = models.CharField(verbose_name=u"密码",max_length=200)
+    fee = models.CharField(verbose_name=u"余额", max_length=8000)
     ak_id = models.CharField(verbose_name=u"id",max_length=200)
     ak_secret = models.CharField(verbose_name=u"key密码",max_length=200)
     security_group_id = models.CharField(verbose_name=u"安全组",max_length=200)
     aliyun_images = models.CharField(verbose_name=u"aliyun初始化镜像",max_length=200)
     vswitch_id =  models.CharField(verbose_name=u"vswitch",max_length=200)
-    init_script = models.CharField(verbose_name=u"vswitch", max_length=8000)
+    init_script = models.CharField(verbose_name=u"初始化脚本", max_length=8000)
     class Meta:
         verbose_name = u"阿里key"
         verbose_name_plural = verbose_name
+    def __str__(self):
+        return "%s" % self.username
+
+#select shengfen,FROM_UNIXTIME ((floor(reg1)-19-70*365)*86400-8*3600) as mydate,count(id) as total from (select shengfen,id,FLOOR(reg) as reg1 from users_alilaxin) as total  group by shengfen,reg1 order by shengfen
+#insert into new_table_name1 select shengfen,FROM_UNIXTIME ((floor(reg1)-19-70*365)*86400-8*3600) as mydate,count(id) as total from (select shengfen,id,FLOOR(reg) as reg1 from users_alilaxin) as total  group by shengfen,reg1 order by shengfen
+
+class Aliboard(models.Model):
+    anhui = models.CharField(verbose_name=u"安徽",max_length=200)
+    jiangxi = models.CharField(verbose_name=u"江西",max_length=200)
+    zhejiang = models.CharField(verbose_name=u"浙江", max_length=200)
+    chongqing = models.CharField(verbose_name=u"重庆",max_length=200)
+    sichuan = models.CharField(verbose_name=u"四川",max_length=200)
+    shandong = models.CharField(verbose_name=u"山东",max_length=200)
+    fujian = models.CharField(verbose_name=u"福建",max_length=200)
+    hubei =  models.CharField(verbose_name=u"湖北",max_length=200)
+    hainan = models.CharField(verbose_name=u"海南", max_length=200)
+    yunan = models.CharField(verbose_name=u"云南",max_length=200)
+    jiangsu = models.CharField(verbose_name=u"江苏",max_length=200)
+    hebei = models.CharField(verbose_name=u"河北",max_length=200)
+    shanxi =  models.CharField(verbose_name=u"陕西",max_length=200)
+    tianjin = models.CharField(verbose_name=u"天津", max_length=200)
+    mydate = models.DateTimeField('日期')
+
+    class Meta:
+        verbose_name = u"阿里key"
+        verbose_name_plural = verbose_name
+
+
+
+class AliLaXin(models.Model):
+    shouGou = models.CharField(verbose_name=u"首购时间",max_length=200)
+    shengFen = models.CharField(verbose_name=u"省份",max_length=200)
+    daiLi = models.CharField(verbose_name=u"代理", max_length=200)
+    WangDian = models.CharField(verbose_name=u"网点名称",max_length=200)
+    kehuJingli = models.CharField(verbose_name=u"客户经理",max_length=200)
+    mob = models.CharField(verbose_name=u"用户手机号",max_length=200)
+    reg = models.CharField(verbose_name=u"注册时间",max_length=200)
+    status = models.CharField(verbose_name=u"用户状态", max_length=2000)
+    bangka = models.CharField(verbose_name=u"是否绑卡", max_length=200)
+    orderId = models.CharField(verbose_name=u"首购订单", max_length=200)
+
+    class Meta:
+        verbose_name = u"阿里拉新"
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return "%s" % self.reg
+
+
+class Alifee(models.Model):
+    username = models.CharField(verbose_name=u"用户名",max_length=200)
+    amount = models.CharField(verbose_name=u"余额", max_length=200)
+    date = models.DateField()
+
+    class Meta:
+        verbose_name = u"余额"
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return "%s " % self.username
+
 
 class AliEcs(models.Model):
     name = models.CharField(verbose_name=u"name",max_length=200)
@@ -277,12 +347,15 @@ class ChiXuJiaoFu(models.Model):
     xiang_mu_ming = models.CharField(verbose_name=u"项目名",max_length=200)
     xiang_mu_miaosu = models.CharField(verbose_name=u"项目描述",max_length=200)
     ban_ben_xin_xi = models.CharField(verbose_name=u"版本信息",max_length=200)
+    git = models.CharField(verbose_name=u"git地址",max_length=200)
+
     shell = models.CharField(verbose_name=u"shell",max_length=200)
 
     class Meta:
         verbose_name = u"持续交付"
         verbose_name_plural = verbose_name
-
+    def __str__(self):
+        return '{0}'.format(self.git)
 
 class JiZhangYuan(models.Model):
     ji_zhang_yuan = models.CharField(verbose_name=u"供商名称",max_length=200)
@@ -579,7 +652,92 @@ class UserProfile(AbstractUser):
         from operation.models import UserMessage
         return  UserMessage.objects.filter(has_read=False, user=self.id).count()
 
+class YunweiZu(models.Model):
+    XingMing = models.CharField(verbose_name=u"组名", max_length=200)
+    beizu = models.CharField(verbose_name=u"备注", max_length=200)
+    wangwang = models.CharField(verbose_name=u"旺旺", max_length=200)
+    dingding = models.CharField(verbose_name=u"钉钉", max_length=200)
 
+
+    class Meta:
+        verbose_name = u"报警联系人"
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return self.XingMing
+
+
+class zhujiJiankong(models.Model):
+    name = models.CharField(verbose_name=u"主机名", max_length=200)
+    ip = models.CharField(verbose_name=u"ip", max_length=200)
+    cpu = models.CharField(verbose_name=u"cpu", max_length=200)
+    mem = models.CharField(verbose_name=u"内存", max_length=200)
+    disk = models.CharField(verbose_name=u"磁盘", max_length=200)
+
+
+    class Meta:
+        verbose_name = u"主机监控"
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return self.name
+
+
+class XiangyingShijian(models.Model):
+    dns = models.CharField(verbose_name=u"dns时间", max_length=200)
+    jianlian = models.CharField(verbose_name=u"建连时间", max_length=200)
+    chongDingxiang = models.CharField(verbose_name=u"重定向时间", max_length=200)
+    ShoubaoShijian = models.CharField(verbose_name=u"首包时间", max_length=200)
+    ZhunbeiShijian = models.CharField(verbose_name=u"准备时间", max_length=200)
+    SSL = models.CharField(verbose_name=u"SSL时间", max_length=200)
+
+    class Meta:
+        verbose_name = u"指标对比"
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return self.dns
+
+
+class Yunwei(models.Model):
+    XingMing = models.CharField(verbose_name=u"姓名", max_length=200)
+    shouji_haoma = models.CharField(verbose_name=u"手机号码", max_length=200)
+    youxiang = models.CharField(verbose_name=u"邮箱", max_length=200)
+    wangwang = models.CharField(verbose_name=u"旺旺", max_length=200)
+    dingding = models.CharField(verbose_name=u"钉钉", max_length=200)
+    yunweizu = models.ForeignKey(YunweiZu,  on_delete=models.CASCADE, verbose_name=u"所属组")
+
+    class Meta:
+        verbose_name = u"报警联系人"
+        verbose_name_plural = verbose_name
+    def __str__(self):
+        return self.XingMing
+
+class Web(models.Model):
+    jiankong_leixing = models.CharField(verbose_name=u"监控类型", max_length=200)
+    renwu_mingcheng = models.CharField(verbose_name=u"任务名称", max_length=200)
+    jiankong_dizhi = models.CharField(verbose_name=u"监控地址", max_length=200)
+    jiankong_pinlv = models.CharField(verbose_name=u"监控频率", max_length=200)
+    keyongxing = models.CharField(verbose_name=u"可用性", max_length=200)
+    pinjun_shijian = models.CharField(verbose_name=u"平均响应时间", max_length=200)
+    lianxu_yuzhi_baojing = models.CharField(verbose_name=u"连续阈值后报警", max_length=200)
+    baojing_jibie = models.CharField(verbose_name=u"报警级别", max_length=200)
+
+    class Meta:
+        verbose_name = u"报警联系人"
+        verbose_name_plural = verbose_name
+
+
+class Web(models.Model):
+    jiankong_leixing = models.CharField(verbose_name=u"监控类型", max_length=200)
+    renwu_mingcheng = models.CharField(verbose_name=u"任务名称", max_length=200)
+    jiankong_dizhi = models.CharField(verbose_name=u"监控地址", max_length=200)
+    jiankong_pinlv = models.CharField(verbose_name=u"监控频率", max_length=200)
+    keyongxing = models.CharField(verbose_name=u"可用性", max_length=200)
+    pinjun_shijian = models.CharField(verbose_name=u"平均响应时间", max_length=200)
+    lianxu_yuzhi_baojing = models.CharField(verbose_name=u"连续阈值后报警", max_length=200)
+    baojing_jibie = models.CharField(verbose_name=u"报警级别", max_length=200)
+
+    class Meta:
+        verbose_name = u"站点管理"
+        verbose_name_plural = verbose_name
 # 邮箱验证码model
 
 

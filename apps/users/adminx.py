@@ -6,9 +6,10 @@ __date__ = '2018/8/29 0009 08:02'
 import xadmin
 from django.contrib.auth.models import Group, Permission
 from users.models import *
+from organization.models import *
 import os,json,re
 import subprocess
-
+from import_export import resources
 from operation.models import CourseComments, UserFavorite, UserMessage, UserCourse, UserAsk
 from organization.models import CityDict, Teacher, CourseOrg
 from xadmin.models import Log
@@ -42,8 +43,8 @@ class AccessRecordAdmin(object):
     data_charts = {
         "user_count": {'title': u"User Report", "x-field": "date", "y-field": ("user_count", "view_count"),
                        "order": ('date',)},
-        "avg_count": {'title': u"Avg Report", "x-field": "date", "y-field": ('avg_count',), "order": ('date',)},
-        "per_month": {'title': u"Monthly Users", "x-field": "_chart_month", "y-field": ("user_count",),
+        "avg_count": {'title': u"平均报表", "x-field": "date", "y-field": ('avg_count',), "order": ('date',)},
+        "per_month": {'title': u"每个月", "x-field": "_chart_month", "y-field": ("user_count",),
                       "option": {
                           "series": {"bars": {"align": "center", "barWidth": 0.8, 'show': True}},
                           "xaxis": {"aggregate": "sum", "mode": "categories"},
@@ -53,6 +54,135 @@ class AccessRecordAdmin(object):
 
     def _chart_month(self, obj):
         return obj.date.strftime("%B")
+
+
+class MyActionCeateJenkins(BaseActionView):
+    # 这里需要填写三个属性
+    action_name = "创建jenkins"    #: 相当于这个 Action 的唯一标示, 尽量用比较针对性的名字
+    description = u'创建服务器%(verbose_name_plural)s'
+    model_perm = 'change'
+
+    def do_action(self, queryset):
+        for obj in queryset:
+            alikey = AliKey.objects.get(id=1)
+            #response= regecs.main(alikey.ak_id, alikey.ak_secret)
+            s = """
+cat <<EOF > ~/test.py
+import json
+import logging
+import time
+from aliyunsdkcore import client
+from aliyunsdkecs.request.v20140526.DescribeInstancesRequest import DescribeInstancesRequest
+from aliyunsdkecs.request.v20140526.RunInstancesRequest import RunInstancesRequest
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S')
+ak_id = "{0}"
+ak_secret = "{1}"
+region_id = "cn-hangzhou"
+# your expected instance type
+instance_type = "ecs.xn4.small"
+vswitch_id = "{2}"
+image_id = "{4}"
+security_group_id = "{3}"
+amount = 1;
+auto_release_time = "2018-12-05T22:40:00Z"
+clt = client.AcsClient(ak_id, ak_secret, region_id)
+runtime=0;
+
+
+# create instance automatic running
+def batch_create_instance():
+    request = build_request()
+    request.set_Amount(amount)
+    _execute_request(request)
+
+
+# create instance with public ip.
+def batch_create_instance_with_public_ip():
+    request = build_request()
+    request.set_Amount(amount)
+    request.set_InternetMaxBandwidthOut(1)
+    _execute_request(request)
+
+
+# create instance with auto release time.
+def batch_create_instance_with_auto_release_time():
+    request = build_request()
+    request.set_Amount(amount)
+    request.set_AutoReleaseTime(auto_release_time)
+    _execute_request(request)
+
+
+def _execute_request(request):
+    response = _send_request(request)
+    if response.get('Code') is None:
+        instance_ids = response.get('InstanceIdSets').get('InstanceIdSet')
+        running_amount = 0
+        while running_amount < amount:
+            time.sleep(15)
+            running_amount = check_instance_running(instance_ids)
+    #print("ecs instance %s is running", instance_ids)
+
+
+def check_instance_running(instance_ids):
+    request = DescribeInstancesRequest()
+    request.set_InstanceIds(json.dumps(instance_ids))
+    response = _send_request(request)
+    if response.get('Code') is None:
+        instances_list = response.get('Instances').get('Instance')
+        running_count = 0
+        for instance_detail in instances_list:
+            if instance_detail.get('Status') == "Starting":
+                running_count += 1
+        return running_count
+
+
+def build_request():
+    request = RunInstancesRequest()
+    request.set_ImageId(image_id)
+    request.set_VSwitchId(vswitch_id)
+    request.set_SecurityGroupId(security_group_id)
+    request.set_InstanceName("Instance12-04")
+    request.set_InstanceType(instance_type)
+    return request
+
+
+# send open api request
+def _send_request(request):
+    global runtime
+    request.set_accept_format('json')
+    try:
+        response_str = clt.do_action(request)
+        if runtime > 0:
+            logging.info(response_str)
+            print(response_str)
+        runtime+=1
+        response_detail = json.loads(response_str)
+        return response_detail
+    except Exception as e:
+        logging.error(e)
+
+
+if __name__ == '__main__':
+    batch_create_instance()
+    # batch_create_instance_with_public_ip()
+    # batch_create_instance_with_auto_release_time()
+EOF
+
+python3 ~/test.py
+            """.format(alikey.ak_id,alikey.ak_secret,alikey.vswitch_id,alikey,security_group_id,alikey.aliyun_images)
+            regex = re.compile(r'\\(?![/u"])')
+
+            str = os.popen(s).read().replace("b'","").replace("'","")
+            str = regex.sub(r"\\\\", str)
+            return1=json.loads(str)
+            obj.ip=return1['Instances']['Instance'][0]["NetworkInterfaces"]['NetworkInterface'][0]['PrimaryIpAddress']
+            #其实我们做的只有这一部分 ********
+            #obj.images += 'sss'
+            obj.save()
+            self.msg('设置成功', 'success')
+      #  return HttpResponse('{0}'.format(str), content_type='application/json')
 
 
 
@@ -181,7 +311,8 @@ python3 ~/test.py
             #其实我们做的只有这一部分 ********
             #obj.images += 'sss'
             obj.save()
-        return HttpResponse('{0}'.format(str), content_type='application/json')
+            self.msg('设置成功', 'success')
+      #  return HttpResponse('{0}'.format(str), content_type='application/json')
 
 
 
@@ -279,10 +410,26 @@ class GlobalSettings(object):
 
     def get_site_menu(self):
         return (
+            {'title': 'p88health', 'menus': (
+                {'title': '提取logo', 'url': self.get_model_url(P8logo, 'changelist')},
+                {'title': '阿里看板', 'url': self.get_model_url(Aliboard, 'changelist')},
+
+            )},
+            {'title': '拉新', 'menus': (
+                {'title': '阿里云拉新', 'url': self.get_model_url(AliLaXin, 'changelist')},
+                {'title': '阿里看板', 'url': self.get_model_url(Aliboard, 'changelist')},
+
+            )},
+            {'title': '报警服务', 'menus': (
+                {'title': '报警联系人', 'url': self.get_model_url(Yunwei, 'changelist')},
+                {'title': '报警联系组', 'url': self.get_model_url(YunweiZu, 'changelist')},
+
+            )},
             {'title': '阿里服务器', 'menus': (
                 {'title': 'key管理', 'url': self.get_model_url(AliKey, 'changelist')},
                 {'title': 'Ecs管理', 'url': self.get_model_url(AliEcs, 'changelist')},
                 {'title': '初始化脚本', 'url': self.get_model_url(AccessRecord, 'changelist')},
+                {'title': '阿里云费用', 'url': self.get_model_url(Alifee, 'changelist')},
 
             )},
 
@@ -447,6 +594,105 @@ class AliEcsAdmin(object):
 
 xadmin.site.register(AliKey, AliKeyAdmin)
 xadmin.site.register(AliEcs, AliEcsAdmin)
+
+# 创建阿里云Ecs的管理类
+class AlifeeAdmin(object):
+    search_fields = ['username']
+
+#    list_display = ['name']
+#    search_fields = ['name']
+    actions =[MyActionCeateEcs,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+    data_charts = {
+        "费用消耗": {'title': u"用户报告", "x-field": "date", "y-field": ("amount"),
+                       "order": ('date',)},
+
+    }
+
+xadmin.site.register(Alifee, AlifeeAdmin)
+
+
+class AliLaXinResource(resources.ModelResource):
+
+    class Meta:
+        model = AliLaXin
+        #fields = ('shengFen','daiLi','WangDian','kehuJingli','mob','reg','shouGou','status','bangka','orderId')
+        #exclude = ('id')
+
+
+class P8logoResource(resources.ModelResource):
+
+    class Meta:
+        model = P8logo
+        #fields = ('shengFen','daiLi','WangDian','kehuJingli','mob','reg','shouGou','status','bangka','orderId')
+        #exclude = ('id')
+
+
+@xadmin.sites.register(P8logo)
+class P8logoAdmin(object):
+    import_export_args = {'from_encoding ':'utf-8','import_resource_class': P8logoResource, 'export_resource_class': P8logoResource}
+    search_fields = ['name','pid']
+
+    list_display = ['name','pid']
+    list_per_page = 50
+#    search_fields = ['name']
+    actions =[MyActionCeateEcs,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+# 创建阿里云
+@xadmin.sites.register(AliLaXin)
+class AliLaXinAdmin(object):
+    import_export_args = {'from_encoding ':'utf-8','import_resource_class': AliLaXinResource, 'export_resource_class': AliLaXinResource}
+    search_fields = ['username']
+
+#    list_display = ['name']
+#    search_fields = ['name']
+    actions =[MyActionCeateEcs,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+
+# 创建阿里云
+@xadmin.sites.register(Aliboard)
+class AliBoardAdmin(object):
+    #import_export_args = {'from_encoding ':'utf-8','import_resource_class': AliLaXinResource, 'export_resource_class': AliLaXinResource}
+    search_fields = ['username']
+
+#    list_display = ['name']
+#    search_fields = ['name']
+    actions =[MyActionCeateEcs,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+    data_charts = {
+        "费用消耗": {'title': u"用户报告", "x-field": "mydate", "y-field": ("anhui","jiangxi","zhejiang","chongqing","sichuan","shandong","fujian","hubei","hainan","yunan","jiangsu","hebei","shanxi","tianjin"),
+                       "order": ('mydate',)},
+
+    }
+
+#xadmin.site.register(AliLaXin, AliLaXinAdmin)
+
+
+# 创建阿里云key的管理类
+class YunweiAdmin(object):
+    search_fields = ['xingming']
+#    list_display = ['name']
+#    search_fields = ['name']
+#    actions =[MyAction,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+# 创建阿里云Ecs的管理类
+class YunweiZuAdmin(object):
+    search_fields = ['xingming']
+
+#    list_display = ['name']
+#    search_fields = ['name']
+    actions =[MyActionCeateEcs,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+xadmin.site.register(Yunwei, YunweiAdmin)
+xadmin.site.register(YunweiZu, YunweiZuAdmin)
+
 
 # 创建供应商的管理类
 class RunDdosAdmin(object):
@@ -693,6 +939,8 @@ xadmin.site.register(FuZeRen, FuZeRenAdmin)
 # 创建负责人管理类
 class ChiXuJiaoFuAdmin(object):
     pass
+    actions =[MyActionCeateJenkins,]
+
 #    list_display = ['fu_ze_ren', 'shou_ji', 'qq', 'wei_chat']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
