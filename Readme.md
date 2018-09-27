@@ -13,6 +13,8 @@ $ cd Mxonline3
 $ pip install -r requirements.txt
 $ python manage.py runserver
 ```
+
+```
 #运行应用容器和mysql
 docker run --name mysql57-db -p 3306:3306 -v /my/own/datadir:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=my-secret-1pw -d mysql:5.7
 docker run -d -p 8080:8080 --name k8s aontimer/mxonline3 -e "host=mysql57-db"
@@ -21,6 +23,7 @@ docker exec -it k8s python3 manage.py makemigrations
 docker exec -it k8s python3 manage.py migrate
 #创建超级管理员
 docker exec -it k8s python3 manage.py createsuperuser
+```
 
 #
 use the address: http://127.0.0.1:8000/
