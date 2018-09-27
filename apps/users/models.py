@@ -141,13 +141,14 @@ class RunDdos(models.Model):
 class RunDocker(models.Model):
     Name = models.CharField(verbose_name=u"名称",max_length=200)
     Number = models.CharField(verbose_name=u"数量",max_length=200)
-    env = models.CharField(verbose_name=u"环境变量",max_length=200)
-    readiness = models.CharField(verbose_name=u"readiness",max_length=200)
-    liveness = models.CharField(verbose_name=u"liveness",max_length=200)
+    env = models.CharField(verbose_name=u"环境变量",max_length=200,null=True,blank=True)
+    readiness = models.CharField(verbose_name=u"readiness",max_length=200,null=True,blank=True)
+    liveness = models.CharField(verbose_name=u"liveness",max_length=200,null=True,blank=True)
     images = models.CharField(verbose_name=u"images",max_length=200)
-
+    port = models.CharField(verbose_name=u"port",max_length=200,null=True,default="80")
+    tag = models.CharField(verbose_name=u"tag",max_length=200)
     class Meta:
-        verbose_name = u"创建pod"
+        verbose_name = u"pod"
         verbose_name_plural = verbose_name
 
 

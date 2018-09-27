@@ -317,10 +317,10 @@ python3 ~/test.py
 
 
 
-class MyAction(BaseActionView):
+class MyActionCreateK8s(BaseActionView):
     # 这里需要填写三个属性
-    action_name = "change_sss"    #: 相当于这个 Action 的唯一标示, 尽量用比较针对性的名字
-    description = u'Test selected %(verbose_name_plural)s'
+    action_name = "create_k8s"    #: 相当于这个 Action 的唯一标示, 尽量用比较针对性的名字
+    description = u'创建所选的 %(verbose_name_plural)s'
     model_perm = 'change'
 
     def do_action(self, queryset):
@@ -349,7 +349,7 @@ spec:
       spec:
         containers:
         - name: nginx{0}
-          image: aontimer/{0}
+          image: aontimer/{0}:1
           ports:
           - containerPort: 80
           env:
@@ -376,7 +376,7 @@ metadata:
   name: web{0}
 spec:
   rules:
-  - host: {0}.myweb.com
+  - host: {0}.p88health.com
     http:
       paths:
       - backend:
@@ -394,6 +394,87 @@ rancher kubectl create -f ~/test.txt
         return HttpResponse('{0}'.format(s), content_type='application/json')
 
 
+
+class MyActionUpdateK8s(BaseActionView):
+    # 这里需要填写三个属性
+    action_name = "change_k8s"    #: 相当于这个 Action 的唯一标示, 尽量用比较针对性的名字
+    description = u'创建或更新所选的 %(verbose_name_plural)s'
+    model_perm = 'change'
+
+    def do_action(self, queryset):
+        for obj in queryset:
+            envarray=obj.env.split(",")
+            senv = """          - name: {0}
+            value: \"{1}\"
+"""
+            senvall=""
+            for item in envarray:
+                itemarray = item.split("=")
+                senvall=senvall+senv.format(itemarray[0],itemarray[1])
+            s ="""
+cat <<EOF > ~/test.txt
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+    name: red-nginx{0}
+spec:
+    replicas: {1} 
+    template:
+      metadata:
+        labels: 
+          app: red-nginx{0}
+      spec:
+        containers:
+        - name: nginx{0}
+          image: aontimer/{0}:{3}
+          ports:
+          - containerPort: {4}
+          env:
+          - name: DEMO_GREETING
+            value: "Hello from the environment"
+{2}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: red-service{0}
+spec:
+  type: NodePort
+  selector:
+    app: red-nginx{0}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {3}
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web{0}
+spec:
+  rules:
+  - host: {0}.p88health.com
+    http:
+      paths:
+      - backend:
+          serviceName: red-service{0}
+          servicePort: 80
+EOF
+
+rancher kubectl apply -f ~/test.txt
+""".format(obj.images,obj.Number,senvall,obj.tag,obj.port)
+            os.system(s)
+            #self.msg('设置成功', 'success')
+            #其实我们做的只有这一部分 ********
+            #obj.images += 'sss'
+            #obj.save()
+        return
+
+        #return HttpResponse('{0}'.format(s), content_type='application/json')
+
+
 # X admin的全局配置信息设置
 class BaseSetting(object):
     # 主题功能开启
@@ -402,6 +483,7 @@ class BaseSetting(object):
 
 
 # x admin 全局配置参数信息设置
+
 class GlobalSettings(object):
     site_title = "后台管理"
     site_footer = "mooc"
@@ -551,6 +633,7 @@ class GlobalSettings(object):
 
 
 # 创建admin的管理类,这里不再是继承admin，而是继承object
+@xadmin.sites.register(EmailVerifyRecord)
 class EmailVerifyRecordAdmin(object):
     # 配置后台我们需要显示的列
     list_display = ['code', 'email','send_type', 'send_time']
@@ -568,6 +651,7 @@ class RecordAdmin(object):
 
 
 # 创建banner的管理类
+@xadmin.sites.register(Banner)
 class BannerAdmin(object):
     list_display = ['title', 'image', 'url','index', 'add_time']
     search_fields = ['title', 'image', 'url','index']
@@ -575,6 +659,8 @@ class BannerAdmin(object):
 
 
 # 创建阿里云key的管理类
+
+@xadmin.sites.register(AliKey)
 class AliKeyAdmin(object):
     search_fields = ['ali_id']
 #    list_display = ['name']
@@ -584,6 +670,7 @@ class AliKeyAdmin(object):
 
 
 # 创建阿里云Ecs的管理类
+@xadmin.sites.register(AliEcs)
 class AliEcsAdmin(object):
     search_fields = ['ip']
 
@@ -592,10 +679,9 @@ class AliEcsAdmin(object):
     actions =[MyActionCeateEcs,]
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
-xadmin.site.register(AliKey, AliKeyAdmin)
-xadmin.site.register(AliEcs, AliEcsAdmin)
 
 # 创建阿里云Ecs的管理类
+@xadmin.sites.register(Alifee)
 class AlifeeAdmin(object):
     search_fields = ['username']
 
@@ -609,11 +695,8 @@ class AlifeeAdmin(object):
 
     }
 
-xadmin.site.register(Alifee, AlifeeAdmin)
-
 
 class AliLaXinResource(resources.ModelResource):
-
     class Meta:
         model = AliLaXin
         #fields = ('shengFen','daiLi','WangDian','kehuJingli','mob','reg','shouGou','status','bangka','orderId')
@@ -621,7 +704,6 @@ class AliLaXinResource(resources.ModelResource):
 
 
 class P8logoResource(resources.ModelResource):
-
     class Meta:
         model = P8logo
         #fields = ('shengFen','daiLi','WangDian','kehuJingli','mob','reg','shouGou','status','bangka','orderId')
@@ -636,7 +718,6 @@ class P8logoAdmin(object):
     list_display = ['name','pid']
     list_per_page = 50
 #    search_fields = ['name']
-    actions =[MyActionCeateEcs,]
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
@@ -666,13 +747,13 @@ class AliBoardAdmin(object):
     data_charts = {
         "费用消耗": {'title': u"用户报告", "x-field": "mydate", "y-field": ("anhui","jiangxi","zhejiang","chongqing","sichuan","shandong","fujian","hubei","hainan","yunan","jiangsu","hebei","shanxi","tianjin"),
                        "order": ('mydate',)},
-
     }
 
 #xadmin.site.register(AliLaXin, AliLaXinAdmin)
 
 
 # 创建阿里云key的管理类
+@xadmin.sites.register(Yunwei)
 class YunweiAdmin(object):
     search_fields = ['xingming']
 #    list_display = ['name']
@@ -682,6 +763,8 @@ class YunweiAdmin(object):
 
 
 # 创建阿里云Ecs的管理类
+
+@xadmin.sites.register(YunweiZu)
 class YunweiZuAdmin(object):
     search_fields = ['xingming']
 
@@ -690,267 +773,209 @@ class YunweiZuAdmin(object):
     actions =[MyActionCeateEcs,]
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
-xadmin.site.register(Yunwei, YunweiAdmin)
-xadmin.site.register(YunweiZu, YunweiZuAdmin)
 
-
-# 创建供应商的管理类
+@xadmin.sites.register(RunDdos)
 class RunDdosAdmin(object):
     list_display = ['name']
     search_fields = ['name']
-    actions =[MyAction,]
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
-xadmin.site.register(RunDdos, RunDdosAdmin)
 
-# 创建供应商的管理类
+@xadmin.sites.register(RunDocker)
 class RunDockerAdmin(object):
-    list_display = ['Name', 'Number', 'env', 'images', 'liveness']
+    list_display = ['Name', 'Number', 'env', 'images','tag', 'liveness']
     search_fields = ['Name']
-    actions =[MyAction,]
+    actions =[MyActionUpdateK8s]
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(RunDocker, RunDockerAdmin)
-
-
-# 创建供应商的管理类
+@xadmin.sites.register(GongShangXinXi)
 class GongShangXinXiAdmin(object):
     list_display = ['gong_shang_ming_chen', 'lian_xi_ren', 'lian_xi_dian_hua', 'lian_xi_di_zhi', 'bei_zhu']
     search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(GongShangXinXi, GongShangXinXiAdmin)
-
-
 # 创建水泥管理类
+@xadmin.sites.register(ShuiNiXinXi)
 class ShuiNiXinXiAdmin(object):
     list_display = ['shui_ni_bian_hao', 'chang_jia', 'pin_pai', 'xing_hao', 'gui_ge', 'bei_zhu']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(ShuiNiXinXi, ShuiNiXinXiAdmin)
-
-
-# 创建客户管理的管理类
+@xadmin.sites.register(KeHuXinXi)
 class KeHuXinXiAdmin(object):
     list_display = ['ke_hu_bian_hao', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
     search_fields = ['ke_hu_bian_hao', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
     list_filter = ['ke_hu_bian_hao', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(KeHuXinXi, KeHuXinXiAdmin)
-
-
 # 创建装卸工管理类
+@xadmin.sites.register(ZhuangXieGong)
 class ZhuangXieGongAdmin(object):
     list_display = ['zhuang_xie_gong', 'dianhua1', 'dianhua2', 'bei_zhu']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(ZhuangXieGong, ZhuangXieGongAdmin)
-
-
 # 创建单位管理类
+@xadmin.sites.register(DanWei)
 class DanWeiAdmin(object):
     list_display = ['dan_wei_ming_cheng', 'lian_xi_ren', 'lian_xi_dian_hua', 'lian_xi_di_zhi', 'bei_zhu']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(DanWei, DanWeiAdmin)
-
-
 # 创建车辆管理类
+@xadmin.sites.register(CheLiang)
 class CheLiangAdmin(object):
     list_display = ['che_hao', 'si_ji', 'dian_hua1', 'dian_hua2', 'bei_zhu']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(CheLiang, CheLiangAdmin)
-
-
 # 创建采购管理类
+@xadmin.sites.register(CaiGou)
 class CaiGouAdmin(object):
     list_display = ['cai_gou_ri_qi', 'chang_jia', 'chang_ku_ming_cheng', 'cai_gou_fang_shi', 'pin_pai', 'xing_hao', 'gui_ge', 'dan_jia', 'shu_liang', 'jin_e', 'che_chuan_hao', 'yun_jia', 'yun_fei', 'cao_zuo_yuan', 'bei_zhu']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(CaiGou, CaiGouAdmin)
-
-
 # 创建采购损耗管理类
+@xadmin.sites.register(CaiGouSunHao)
 class CaiGouSunHaoAdmin(object):
     list_display = ['ri_qi', 'cang_ku_ming_cheng', 'cang_jia', 'pin_pai', 'xing_hao', 'gui_ge', 'sun_hao_shu_liang', 'cao_zuo_yuan', 'bei_zhu']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(CaiGouSunHao, CaiGouSunHaoAdmin)
-
-
 # 创建销售登记管理类
+@xadmin.sites.register(XiaoShouDengJi)
 class XiaoShouDengJiAdmin(object):
     list_display = ['dan_hao', 'ri_qi', 'qu_yu', 'ke_hu_ming_cheng', 'che_pai_hao', 'si_ji', 'si_ji_dian_hua', 'fu_kuan_fang_shi', 'jin_e', 'you_hui_jin_e', 'shi_shou_jin_e', 'cao_zuo_yuan', 'bei_zhu' ,'da_yin']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(XiaoShouDengJi, XiaoShouDengJiAdmin)
-
-
 # 创建司机结算管理类
+@xadmin.sites.register(SiJiJieSuan)
 class SiJiJieSuanAdmin(object):
     list_display = ['ri_qi', 'che_pai_hao', 'si_ji_xing_ming', 'si_ji_dian_hua', 'dang_qian_yun_fei', 'fu_yun_fei', 'fu_kuan_fang_shi', 'wei_fu_yun_fei', 'cao_zuo_yuan', 'bei_zhu', 'da_yin']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(SiJiJieSuan, SiJiJieSuanAdmin)
-
-
 # 创建装卸管理类
+@xadmin.sites.register(ZhuangXieJieSuan)
 class ZhuangXieJieSuanAdmin(object):
     list_display = ['ri_qi', 'zhuang_xie_gong', 'dang_qian_zhuang_xie', 'fu_zhuang_xie_fei', 'wei_fu_zhuang_xie', 'cao_zuo_yuan', 'bei_zhu' ,'da_yin']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(ZhuangXieJieSuan, ZhuangXieJieSuanAdmin)
-
-
 # 创建采购损耗管理类
+@xadmin.sites.register(CaiGouYunFeiJieSuan)
 class CaiGouYunFeiJieSuanAdmin(object):
     list_display = ['ri_qi', 'che_pai_hao', 'dang_qian_yun_fei', 'jie_suan_yun_fei', 'cao_zuo_yuan', 'bei_zhu']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(CaiGouYunFeiJieSuan, CaiGouYunFeiJieSuanAdmin)
-
-
 # 创建水泥货款管理类
+@xadmin.sites.register(ShuiNi)
 class ShuiNiAdmin(object):
     list_display = ['ri_qi', 'qu_yu', 'ke_hu_ming_cheng', 'wei_fu_huo_kuan', 'fu_kuan_jin_e', 'da_xie', 'fu_kuan_fang_shi' ,'sheng_yu_huo_kuan', 'cao_zuo_yuan', 'da_yin']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(ShuiNi, ShuiNiAdmin)
-
 
 # 创建采购付款管理类
+@xadmin.sites.register(CaiGouFuKuan)
 class CaiGouFuKuanAdmin(object):
     list_display = ['ri_qi', 'cang_jia', 'qian_kuan_jin_e', 'fu_kuan_jin_e', 'cao_zuo_yuan', 'da_yin']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(CaiGouFuKuan, CaiGouFuKuanAdmin)
-
-
 # 创建库存管理类
+@xadmin.sites.register(DangQianKuCun)
 class DangQianKuCunAdmin(object):
     list_display = ['chang_ku_ming_cheng', 'cang_jia', 'pin_pai', 'xing_hao', 'gui_ge', 'cai_gou_shu_liang', 'song_huo_shu_liang', 'sun_hao_shu_liang', 'ku_cun_shu_liang']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(DangQianKuCun, DangQianKuCunAdmin)
-
-
 # 创建域名管理类
+@xadmin.sites.register(Dns)
 class DnsAdmin(object):
     list_display = ['name']
 
 
 # 创建域名ip管理类
+@xadmin.sites.register(DnsIp)
 class DnsIpAdmin(object):
     list_display = ['yu_ming','zhu_ji_ji_lu', 'ji_lu_zhi', 'ip']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(Dns, DnsAdmin)
-xadmin.site.register(DnsIp, DnsIpAdmin)
-
-
-
 # 创建机房管理类
+@xadmin.sites.register(JiFangGuanLi)
 class JiFangGuanLiAdmin(object):
     list_display = ['ji_fang_biao_shi', 'ji_fang_ming_chen', 'ji_fang_di_zhi']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(JiFangGuanLi, JiFangGuanLiAdmin)
-
 
 # 创建宿组管理类
+@xadmin.sites.register(ShuZuGuanLi)
 class ShuZuGuanliAdmin(object):
     list_display = ['fu_wu_qi_zu', ['miao_su'],['ke_xuan_fu_wu_qi']]
 
 
 # 创建主机管理类
+@xadmin.sites.register(ZhuJiGuanLi)
 class ZhuJiGuanLiAdmin(object):
     list_display = ['zu_ji_ming','guan_li_ip', 'suo_zai_ji_fang', 'qi_ta_ip', 'zi_can', 'she_bei_lei_xing', 'shang_jia_shi_jian', 'cpu_xing_hao', 'cpu_shu_liang', 'nei_cun_da_xiao', 'ying_pan_xin_xi', 'SN_hao_ma', 'suo_zai_wei_zhi', 'bei_zhu_xin_xi']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-#xadmin.site.register(ShuZuGuanli, ShuZuGuanLiAdmin)
-xadmin.site.register(ZhuJiGuanLi, ZhuJiGuanLiAdmin)
-
 
 # 创建产品管理类
+@xadmin.sites.register(ChanPinGuanLi)
 class ChanPinGuanLiAdmin(object):
     list_display = ['zhu_ji_ming', 'guan_li_ip']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(ChanPinGuanLi, ChanPinGuanLiAdmin)
-
-
 # 创建项目管理类
+@xadmin.sites.register(XiangMuGuanLi)
 class XiangMuGuanLiAdmin(object):
     list_display = ['xiang_mu_ming_chen', 'xiang_mu_miao_su', 'yu_yan_lei_xing', 'cheng_xu_lei_xing']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 
-xadmin.site.register(XiangMuGuanLi, XiangMuGuanLiAdmin)
-
-
 # 创建负责人管理类
+@xadmin.sites.register(FuZeRen)
 class FuZeRenAdmin(object):
     list_display = ['fu_ze_ren', 'shou_ji', 'qq', 'wechat']
 #    search_fields = ['gong_shang_ming_chen']
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
-xadmin.site.register(FuZeRen, FuZeRenAdmin)
 
-
-# 创建负责人管理类
+# 创建管理类
+@xadmin.sites.register(ChiXuJiaoFu)
 class ChiXuJiaoFuAdmin(object):
     pass
     actions =[MyActionCeateJenkins,]
 
-#    list_display = ['fu_ze_ren', 'shou_ji', 'qq', 'wei_chat']
-#    search_fields = ['gong_shang_ming_chen']
-#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
-
-xadmin.site.register(ChiXuJiaoFu, ChiXuJiaoFuAdmin)
-
-
-# 将model与admin管理器进行关联注册
-xadmin.site.register(EmailVerifyRecord, EmailVerifyRecordAdmin)
-xadmin.site.register(Banner, BannerAdmin)
 
 # 将Xadmin全局管理器与我们的view绑定注册。
 xadmin.site.register(views.BaseAdminView, BaseSetting)
