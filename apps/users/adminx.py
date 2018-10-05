@@ -464,6 +464,7 @@ spec:
 EOF
 
 rancher kubectl apply -f ~/test.txt
+rancher kubectl autoscale deployment red-nginx{0} --min=2 --max=5 --cpu-percent=80
 """.format(obj.images,obj.Number,senvall,obj.tag,obj.port)
             os.system(s)
             #self.msg('设置成功', 'success')

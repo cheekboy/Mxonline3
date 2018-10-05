@@ -1,6 +1,7 @@
 # Mxonline3
 
 [![Build Status](https://travis-ci.org/jiangming1/Mxonline3.svg?branch=master)](https://travis-ci.org/jiangming1/Mxonline3.svg?branch=master)
+[![Build status](https://aontimer.visualstudio.com/python/_apis/build/status/python-Docker%20container-CI)](https://aontimer.visualstudio.com/python/_build/latest?definitionId=2)
 
 
 使用Python3.x与Django2.0.1开发的在线教育平台网站: http://mxonline.mtianyan.cn
