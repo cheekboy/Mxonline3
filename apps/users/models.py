@@ -88,7 +88,7 @@ class Aliboard(models.Model):
         verbose_name = u"阿里key"
         verbose_name_plural = verbose_name
 
-class AliEcs(models.Model):
+class AliEcsnew(models.Model):
     shiliid = models.CharField(verbose_name=u"id",max_length=200)
     name = models.CharField(verbose_name=u"名称",max_length=200)
     os = models.CharField(verbose_name=u"os", max_length=200)
