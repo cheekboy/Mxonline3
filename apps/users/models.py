@@ -88,6 +88,28 @@ class Aliboard(models.Model):
         verbose_name = u"阿里key"
         verbose_name_plural = verbose_name
 
+class AliEcs(models.Model):
+    shiliid = models.CharField(verbose_name=u"id",max_length=200)
+    name = models.CharField(verbose_name=u"名称",max_length=200)
+    os = models.CharField(verbose_name=u"os", max_length=200)
+    status = models.CharField(verbose_name=u"状态",max_length=200)
+    beizhu = models.CharField(verbose_name=u"备注",max_length=200)
+    region = models.CharField(verbose_name=u"地区",max_length=200)
+    location = models.CharField(verbose_name=u"可用区",max_length=200)
+    ip =  models.CharField(verbose_name=u"ip",max_length=200)
+    neiip = models.CharField(verbose_name=u"内网ip", max_length=200)
+    cpu = models.CharField(verbose_name=u"cpu",max_length=200)
+    mem = models.CharField(verbose_name=u"内存",max_length=200)
+    chuangjian = models.CharField(verbose_name=u"创建",max_length=200)
+    daoqi =  models.CharField(verbose_name=u"到期日期",max_length=200)
+    tag = models.CharField(verbose_name=u"标签", max_length=200)
+    images =  models.CharField(verbose_name=u"镜像",max_length=200)
+    type = models.CharField(verbose_name=u"类型", max_length=200)
+
+    class Meta:
+        verbose_name = u"阿里ecs"
+        verbose_name_plural = verbose_name
+
 
 
 class AliLaXin(models.Model):
