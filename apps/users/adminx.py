@@ -21,6 +21,9 @@ from .models import EmailVerifyRecord, Banner, UserProfile
 
 from django.http import HttpResponse
 from xadmin.plugins.actions import BaseActionView
+from aliyunsdkcore.client import AcsClient
+from aliyunsdkcore.request import CommonRequest
+
 
 
 @xadmin.sites.register(AccessRecord)
@@ -317,81 +320,34 @@ python3 ~/test.py
 
 
 
-class MyActionCreateK8s(BaseActionView):
+class MyActionRebootInstance(BaseActionView):
     # 这里需要填写三个属性
-    action_name = "create_k8s"    #: 相当于这个 Action 的唯一标示, 尽量用比较针对性的名字
-    description = u'创建所选的 %(verbose_name_plural)s'
+    action_name = "restart_ecs"    #: 相当于这个 Action 的唯一标示, 尽量用比较针对性的名字
+    description = u'重启所选的 %(verbose_name_plural)s'
     model_perm = 'change'
 
     def do_action(self, queryset):
         for obj in queryset:
-            envarray=obj.env.split(",")
-            senv = """          - name: {0}
-            value: \"{1}\"
-"""
-            senvall=""
-            for item in envarray:
-                itemarray = item.split("=")
-                senvall=senvall+senv.format(itemarray[0],itemarray[1])
-            s ="""
-cat <<EOF > ~/test.txt
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-    name: red-nginx{0}
-spec:
-    replicas: {1} 
-    template:
-      metadata:
-        labels: 
-          app: red-nginx{0}
-      spec:
-        containers:
-        - name: nginx{0}
-          image: aontimer/{0}:1
-          ports:
-          - containerPort: 80
-          env:
-          - name: DEMO_GREETING
-            value: "Hello from the environment"
-{2}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: red-service{0}
-spec:
-  type: NodePort
-  selector:
-    app: red-nginx{0}
-  ports:
-    - protocol: TCP
-      port: 80
+            alikey = AliKey.objects.get(id=3)
+            client = AcsClient(alikey.ak_id,alikey.ak_secret,'us-west-1')
+            request = CommonRequest()
+            request.set_accept_format('json')
+            request.set_domain('ecs.aliyuncs.com')
+            request.set_method('POST')
+            request.set_version('2014-05-26')
+            request.set_action_name('RebootInstance')
 
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: web{0}
-spec:
-  rules:
-  - host: {0}.p88health.com
-    http:
-      paths:
-      - backend:
-          serviceName: red-service{0}
-          servicePort: 80
-EOF
+            request.add_query_param('InstanceId', obj.shiliid)
+            request.add_query_param('ForceStop', 'true')
+            response = client.do_action_with_exception(request)
 
-rancher kubectl create -f ~/test.txt
-""".format(obj.images,obj.Number,senvall)
-            os.system(s)
+            try:
+                print("a")
+                response = client.do_action_with_exception(request)
+            except:
+                print("false")
 
-            #其实我们做的只有这一部分 ********
-            #obj.images += 'sss'
-            #obj.save()
-        return HttpResponse('{0}'.format(s), content_type='application/json')
+        return
 
 
 
@@ -493,6 +449,11 @@ class GlobalSettings(object):
 
     def get_site_menu(self):
         return (
+            {'title': '阿里云', 'menus': (
+                {'title': 'ecs', 'url': self.get_model_url(AliEcsnew, 'changelist')},
+                {'title': '阿里看板', 'url': self.get_model_url(Aliboard, 'changelist')},
+
+            )},
             {'title': 'p88health', 'menus': (
                 {'title': '提取logo', 'url': self.get_model_url(P8logo, 'changelist')},
                 {'title': '阿里看板', 'url': self.get_model_url(Aliboard, 'changelist')},
@@ -667,6 +628,17 @@ class AliKeyAdmin(object):
 #    list_display = ['name']
 #    search_fields = ['name']
 #    actions =[MyAction,]
+#    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
+
+
+@xadmin.sites.register(AliEcsnew)
+class AliEcsnewAdmin(object):
+    search_fields = ['name']
+#    list_display = ['name']
+#    search_fields = ['name']
+#    actions =[MyAction,]
+    actions =[MyActionRebootInstance]
+
 #    list_filter = ['gong_shang_ming_chen', 'qu_yu', 'ke_hu_ming_chen', 'fu_ze_ren']
 
 

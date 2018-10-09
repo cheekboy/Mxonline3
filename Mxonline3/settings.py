@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'Mxonline3.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 print (os.getenv('host'))
-host='127.0.0.1'
+host='192.168.0.2'
 if os.environ.get('host')!=None:
     host = os.environ['host']
 #( "127.0.0.1",os.environ['host'])[os.environ.get('host')!=None]

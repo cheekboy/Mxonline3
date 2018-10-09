@@ -109,7 +109,8 @@ class AliEcsnew(models.Model):
     class Meta:
         verbose_name = u"阿里ecs"
         verbose_name_plural = verbose_name
-
+    def __str__(self):
+        return "%s" % self.name
 
 
 class AliLaXin(models.Model):
