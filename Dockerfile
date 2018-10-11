@@ -1,4 +1,5 @@
 FROM python:3.6.6
+
 COPY . .
 run pip install -r requirements.txt
 #package.json /opt/apps/p8h_backend
